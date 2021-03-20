@@ -19,17 +19,12 @@
 
 <script>
 export default {
-  props: ['label', 'value', 'isOpenDialog'],
+  props: ['label', 'value', 'isOpenDialog', 'filters'],
   methods: {
     getPath () {
       if (this.isOpenDialog) {
         const result = this.$electron.remote.dialog.showOpenDialogSync({
-          filters: [
-            {
-              name: 'Advanced SubStation Alpha',
-              extensions: ['ssa', 'ass'],
-            },
-          ],
+          filters: this.filters,
           properties: ['openFile'],
         })
 
@@ -37,12 +32,7 @@ export default {
         this.path = result[0]
       } else {
         const result = this.$electron.remote.dialog.showSaveDialogSync({
-          filters: [
-            {
-              name: 'Advanced SubStation Alpha',
-              extensions: ['ass', 'ssa'],
-            },
-          ],
+          filters:  this.filters,
         })
 
         if (result === undefined || result.length === 0) return

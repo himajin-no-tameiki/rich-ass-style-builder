@@ -3,6 +3,7 @@ const fs = require('fs')
 const readline = require('readline')
 const { execFile } = require('child_process')
 const { promisify } = require('util')
+const events = require('events')
 
 const dummyASSHeader = `[Script Info]
 Title: Default Aegisub file
@@ -24,7 +25,7 @@ Format: Layer, Start, End, Style, Name, MarginL, MarginR, MarginV, Effect, Text
 const dialoguePattern = /^Dialogue: [^,]+(,[^,]+,[^,]+,([^,]*),[^,]*,\d+,\d+,\d+,[^,]*,)(.*)$/
 
 const tempASSPath = path.resolve(process.cwd(), 'temp.ass')
-const pipePath = '\\\\.\\pipe\\mpv'
+const pipePath = '\\\\.\\pipe\\mpv_rasb'
 
 export const generateDummyASS = (layers, text = 'Example text!!') => {
   const lines = layers.map((layer, i) => {
@@ -56,9 +57,9 @@ const writeDummyASS = (layers, path) => {
   return promisify(fs.writeFile)(path, generateDummyASS(layers))
 }
 
-export const openMpvWindow = () => {
-  const mpvPath = 'C:\\Users\\*****\\Documents\\APPS\\mpv-x86_64-20201220-git-dde0189\\mpv.exe' // TODO: replace this
+export const openPreviewInMPV = async (layers, mpvPath) => {
   const imgPath = path.resolve(__static, 'placeholder_bg.png')
+  await writeDummyASS(layers, tempASSPath)
   const mpvProc = execFile(mpvPath, [
     imgPath,
     `--input-ipc-server=${pipePath}`,
@@ -67,6 +68,7 @@ export const openMpvWindow = () => {
     '--keep-open=yes',
     '--geometry=600',
   ])
+  await events.once(mpvProc, 'spawn')
   return mpvProc
 }
 
@@ -76,6 +78,7 @@ export const previewStyleOnMpv = async (layers) => {
   while (true) {
     try {
       pipe = fs.createWriteStream(pipePath, { encoding: 'utf-8' })
+      await events.once(pipe, 'open')
       break
     } catch (error) {
       console.log('cannot open pipe')
@@ -86,6 +89,8 @@ export const previewStyleOnMpv = async (layers) => {
     command: ['sub-reload'],
   }
   pipe.write(JSON.stringify(message) + '\n')
+  await events.once(pipe, 'finish')
+  pipe.close()
 }
 
 export const transformAssFile = async (inStream, outStream, layers, { targetStyles } = {}) => {
