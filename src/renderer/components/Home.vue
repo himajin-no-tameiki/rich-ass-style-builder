@@ -102,14 +102,27 @@ export default {
     async showPreview () {
       if (this.mpvIsOpened) return
       if (!this.mpvPath) {
-        alert('You have to specify a path to MPV player')
+        this.$electron.remote.dialog.showMessageBoxSync({
+          type: 'error',
+          message: 'You need to specify a path to MPV',
+        })
+
         return
       }
 
       try {
         this.mpv = await openPreviewInMPV(this.layers, this.mpvPath)
+        this.mpv.on('error', (err) => this.$electron.remote.dialog.showMessageBoxSync({
+          type: 'error',
+          message: 'Cannot launch MPV',
+          detail: err.toString(),
+        }))
       } catch (err) {
-        alert('Failed to open MPV: ' + err)
+        this.$electron.remote.dialog.showMessageBoxSync({
+          type: 'error',
+          message: 'Failed to open MPV',
+          detail: err.toString(),
+        })
       }
     },
     async updatePreview () {
@@ -123,9 +136,16 @@ export default {
         src = await createReadStreamSafe(this.srcFile)
         target = await createWriteStreamSafe(this.outFile)
         await transformAssFile(src, target, this.layers)
+        this.$electron.remote.dialog.showMessageBoxSync({
+          type: 'info',
+          message: 'Finished processing files',
+        })
       } catch (err) {
-        alert('Failed to process the ass file: ' + err)
-        console.error(err)
+        this.$electron.remote.dialog.showMessageBoxSync({
+          type: 'error',
+          message: 'Failed to process the ass file',
+          detail: err.toString(),
+        })
       } finally {
         try {
           if (src) src.destroy()
@@ -134,7 +154,6 @@ export default {
           if (target) target.end()
         } catch (e) { console.error(e) }
         this.processing = false
-        alert('Finished processing files')
       }
     },
   },

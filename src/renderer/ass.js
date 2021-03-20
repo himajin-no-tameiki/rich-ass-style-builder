@@ -68,9 +68,7 @@ export const openPreviewInMPV = async (layers, mpvPath) => {
     '--keep-open=yes',
     '--geometry=600',
   ])
-  mpvProc.on('exit', () => console.log('mpv exit'))
-  mpvProc.on('error', () => alert('Cannot launch MPV'))
-  // await events.once(mpvProc, 'spawn')
+  // await events.once(mpvProc, 'spawn')  // spawn even not fired for some reason
   return mpvProc
 }
 
