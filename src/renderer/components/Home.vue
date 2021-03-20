@@ -39,8 +39,10 @@ export default {
       outFile: '',
       mpvPath: '',
       processing: false,
+      lastId: 0,
       layers: [
         {
+          id: 0,
           color: '#FF0000',
           thickness: 5,
           blur: 0,
@@ -80,9 +82,11 @@ export default {
   },
   methods: {
     addLayer () {
+      this.lastId += 1
       const newLayer = {
         ...this.defaultLayerValues,
         color: randomColor(),
+        id: this.lastId,
       }
       this.layers.push(newLayer)
     },

@@ -12,11 +12,19 @@
         <th>Controls</th>
       </tr>
     </thead>
-    <tbody>
-      <LayerRow v-for="(layer, i) in value"
-        :layer="layer" :index="value.length - i - 1" @input="updateLayer(i, $event)"
-        @layer-up="moveUpLayer(i)" @layer-down="moveDownLayer(i)" @layer-delete="deleteLayer(i)" />
-    </tbody>
+    <transition-group name="layer-list" tag="tbody">
+      <LayerRow
+        v-for="(layer, i) in value"
+        :key="layer.id"
+        :layer="layer"
+        :index="value.length - i - 1"
+        @input="updateLayer(i, $event)"
+        @layer-up="moveUpLayer(i)"
+        @layer-down="moveDownLayer(i)"
+        @layer-delete="deleteLayer(i)"
+        class="layer-list-item"
+      />
+    </transition-group>
   </table>
 </template>
 
@@ -73,5 +81,17 @@ th:nth-child(3) {
 }
 th:nth-child(4) {
   width: 100px;
+}
+
+/* list transition */
+.layer-list-item {
+  transition: all 0.3s ease-in-out;
+}
+.layer-list-enter, .layer-list-leave-to {
+  opacity: 0;
+  transform: translateX(-30px);
+}
+.layer-list-leave-active {
+  position: absolute;
 }
 </style>
