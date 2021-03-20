@@ -1,0 +1,8 @@
+{
+  "main": {
+    // "webpackConfig": "main.webpack.additions.js"
+  },
+  "renderer": {
+    "webpackConfig": "renderer.webpack.additions.js"
+  }
+}
