@@ -58,7 +58,7 @@ const writeDummyASS = (layers, path) => {
 
 export const openMpvWindow = () => {
   const mpvPath = 'C:\\Users\\*****\\Documents\\APPS\\mpv-x86_64-20201220-git-dde0189\\mpv.exe' // TODO: replace this
-  const imgPath = path.resolve(__dirname, 'assets/placeholder_bg.png')
+  const imgPath = path.resolve(__static, 'placeholder_bg.png')
   const mpvProc = execFile(mpvPath, [
     imgPath,
     `--input-ipc-server=${pipePath}`,

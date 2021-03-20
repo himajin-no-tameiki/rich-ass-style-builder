@@ -4,5 +4,7 @@
   },
   "renderer": {
     "webpackConfig": "renderer.webpack.additions.js"
-  }
+  },
+  "title": "Rich ASS Style Builder",
+  "staticSourceDirectory": "src/static"
 }
