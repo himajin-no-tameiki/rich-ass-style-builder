@@ -7,13 +7,22 @@
       </p>
     </div>
     <div class="field">
+      <label class="label is-small">MPV</label>
+      <file-path-form v-model="mpvPath" :isOpenDialog="true" :filters="filters.mpv" label="Path to MPV" />
+    </div>
+    <div class="field">
       <button @click="addLayer" class="button is-small">Add Layer</button>
       <button @click="showPreview" class="button is-small">Show Preview on MPV player</button>
     </div>
-    <file-path-form v-model="mpvPath" :isOpenDialog="true" :filters="filters.mpv" label="Path to MPV" />
     <layer-table v-model="layers" />
-    <file-path-form v-model="srcFile" :isOpenDialog="true" :filters="filters.ass" label="Source File" />
-    <file-path-form v-model="outFile" :isOpenDialog="false" :filters="filters.ass" label="Output File" />
+    <div class="field">
+      <label class="label is-small">Input File</label>
+      <file-path-form v-model="srcFile" :isOpenDialog="true" :filters="filters.ass" label="Source File" />
+    </div>
+    <div class="field">
+      <label class="label is-small">Output File</label>
+      <file-path-form v-model="outFile" :isOpenDialog="false" :filters="filters.ass" label="Output File" />
+    </div>
     <div class="field">
       <button @click="applyLayers" :disabled="processing" class="button is-info">Apply Layers</button>
     </div>
@@ -91,17 +100,19 @@ export default {
       this.layers.push(newLayer)
     },
     async showPreview () {
-      if (!this.mpvIsOpened){
-        if (!this.mpvPath) {
-          alert('You have to specify a path to MPV player')
-          return
-        }
-        try {
-          this.mpv = await openPreviewInMPV(this.layers, this.mpvPath)
-        } catch (err) {
-          alert('Failed to open MPV: ' + err)
-        }
+      if (this.mpvIsOpened) return
+      if (!this.mpvPath) {
+        alert('You have to specify a path to MPV player')
+        return
       }
+
+      try {
+        this.mpv = await openPreviewInMPV(this.layers, this.mpvPath)
+      } catch (err) {
+        alert('Failed to open MPV: ' + err)
+      }
+    },
+    async updatePreview () {
       await previewStyleOnMpv(this.layers)
     },
     async applyLayers () {
@@ -132,7 +143,8 @@ export default {
       deep: true,
       handler: debounce(500, function () {
         if (this.mpvIsOpened) {
-          this.showPreview()
+          console.log('updating layers')
+          this.updatePreview()
         }
       }),
     },

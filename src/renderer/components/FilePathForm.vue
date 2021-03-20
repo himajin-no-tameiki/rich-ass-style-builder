@@ -1,25 +1,22 @@
 <template>
-  <div class="field">
-    <label class="label is-small">{{label}}</label>
-    <div class="field has-addons">
-      <div class="control is-expanded">
-        <input
-          v-model="path"
-          class="input is-small"
-          type="text"
-          placeholder="Output file name..."
-        />
-      </div>
-      <div class="control">
-        <button @click="getPath" class="button is-small">...</button>
-      </div>
+  <div class="field has-addons">
+    <div class="control is-expanded">
+      <input
+        v-model="path"
+        class="input is-small"
+        type="text"
+        placeholder="Output file name..."
+      />
+    </div>
+    <div class="control">
+      <button @click="getPath" class="button is-small">...</button>
     </div>
   </div>
 </template>
 
 <script>
 export default {
-  props: ['label', 'value', 'isOpenDialog', 'filters'],
+  props: ['value', 'isOpenDialog', 'filters'],
   methods: {
     getPath () {
       if (this.isOpenDialog) {

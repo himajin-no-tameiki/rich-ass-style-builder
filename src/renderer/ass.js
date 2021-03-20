@@ -1,7 +1,7 @@
 const path = require('path')
 const fs = require('fs')
 const readline = require('readline')
-const { execFile } = require('child_process')
+const { spawn } = require('child_process')
 const { promisify } = require('util')
 const events = require('events')
 
@@ -60,7 +60,7 @@ const writeDummyASS = (layers, path) => {
 export const openPreviewInMPV = async (layers, mpvPath) => {
   const imgPath = path.resolve(__static, 'placeholder_bg.png')
   await writeDummyASS(layers, tempASSPath)
-  const mpvProc = execFile(mpvPath, [
+  const mpvProc = spawn(mpvPath, [
     imgPath,
     `--input-ipc-server=${pipePath}`,
     `--sub-file=${tempASSPath}`,
@@ -68,7 +68,9 @@ export const openPreviewInMPV = async (layers, mpvPath) => {
     '--keep-open=yes',
     '--geometry=600',
   ])
-  await events.once(mpvProc, 'spawn')
+  mpvProc.on('exit', () => console.log('mpv exit'))
+  mpvProc.on('error', () => alert('Cannot launch MPV'))
+  // await events.once(mpvProc, 'spawn')
   return mpvProc
 }
 
