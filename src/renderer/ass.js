@@ -24,7 +24,7 @@ Format: Layer, Start, End, Style, Name, MarginL, MarginR, MarginV, Effect, Text
 
 const dialoguePattern = /^Dialogue: [^,]+(,[^,]+,[^,]+,([^,]*),[^,]*,\d+,\d+,\d+,[^,]*,)(.*)$/
 
-const tempASSPath = path.resolve(process.cwd(), 'temp.ass')
+const tempASSPath = path.resolve(__static, 'temp.ass')
 const pipePath = '\\\\.\\pipe\\mpv_rasb'
 
 export const generateDummyASS = (layers, text = 'Example text!!') => {
