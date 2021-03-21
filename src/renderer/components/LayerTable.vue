@@ -1,31 +1,33 @@
 <template>
-  <table class="table is-fullwidth">
-    <thead>
-      <tr>
-        <th>Index</th>
-        <th>Color</th>
-        <th>Thickness</th>
-        <th>Blur</th>
-        <th>Opacity</th>
-        <th>Offset X</th>
-        <th>Offset Y</th>
-        <th>Controls</th>
-      </tr>
-    </thead>
-    <transition-group name="layer-list" tag="tbody">
-      <LayerRow
-        v-for="(layer, i) in value"
-        :key="layer.id"
-        :layer="layer"
-        :index="value.length - i - 1"
-        @input="updateLayer(i, $event)"
-        @layer-up="moveUpLayer(i)"
-        @layer-down="moveDownLayer(i)"
-        @layer-delete="deleteLayer(i)"
-        class="layer-list-item"
-      />
-    </transition-group>
-  </table>
+  <div class="box">
+    <table class="table is-fullwidth">
+      <thead>
+        <tr>
+          <th>Index</th>
+          <th>Color</th>
+          <th>Thickness</th>
+          <th>Blur</th>
+          <th>Opacity</th>
+          <th>Offset X</th>
+          <th>Offset Y</th>
+          <th>Controls</th>
+        </tr>
+      </thead>
+      <transition-group name="layer-list" tag="tbody">
+        <LayerRow
+          v-for="(layer, i) in value"
+          :key="layer.id"
+          :layer="layer"
+          :index="value.length - i - 1"
+          @input="updateLayer(i, $event)"
+          @layer-up="moveUpLayer(i)"
+          @layer-down="moveDownLayer(i)"
+          @layer-delete="deleteLayer(i)"
+          class="layer-list-item"
+        />
+      </transition-group>
+    </table>
+  </div>
 </template>
 
 <script>
