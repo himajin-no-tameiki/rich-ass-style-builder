@@ -1,6 +1,6 @@
 'use strict'
 
-import { app, BrowserWindow } from 'electron'
+import { app, BrowserWindow, shell } from 'electron'
 import * as path from 'path'
 import { format as formatUrl } from 'url'
 
@@ -38,6 +38,12 @@ function createMainWindow() {
     setImmediate(() => {
       window.focus()
     })
+  })
+
+  // open links in browser
+  window.webContents.on('new-window', (e, url) => {
+    e.preventDefault()
+    shell.openExternal(url)
   })
 
   return window

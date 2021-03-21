@@ -43,8 +43,9 @@
           Or you can add a blurred layer with a light color at the bottom to make it glow.
         </p>
         <p>
-          You can hit the "Show Preview" button to show an preview of your style, and it updates
-          automatically as you tweak the layer options.
+          You can hit the "Show Preview" button to show an preview of your style in MPV player, 
+          and it updates automatically as you tweak the layer options. If you don't have MPV
+          installed, you can get it from <a href="https://mpv.io/installation/" target="_blank">here</a>.
         </p>
         <p>
           If you disable the color of a layer by unticking the checkbox, the <b>shadow color</b>
