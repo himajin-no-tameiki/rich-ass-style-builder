@@ -6,6 +6,14 @@
         each line will be used. You can abuse this to make the color style-dependent.
       </p>
     </div>
+    <div class="field has-addons">
+      <p class="control">
+        <button @click="importSettings" class="button is-small">Import...</button>
+      </p>
+      <p class="control">
+        <button @click="exportSettings" class="button is-small">Export...</button>
+      </p>
+    </div>
     <div class="field">
       <label class="label is-small">MPV</label>
       <file-path-form v-model="mpvPath" :isOpenDialog="true" :filters="filters.mpv" label="Path to MPV" />
@@ -80,7 +88,13 @@ export default {
             name: 'Advanced SubStation Alpha',
             extensions: ['ass', 'ssa'],
           },
-        ]
+        ],
+        config: [
+          {
+            name: 'Config File',
+            extensions: ['json'],
+          },
+        ],
       }
     }
   },
@@ -154,6 +168,50 @@ export default {
           if (target) target.end()
         } catch (e) { console.error(e) }
         this.processing = false
+      }
+    },
+    async importSettings () {
+      const result = this.$electron.remote.dialog.showOpenDialogSync({
+        filters: this.filters.config,
+        properties: ['openFile']
+      })
+      if (result === undefined || result.length === 0) return
+
+      const filename = result[0]
+      try {
+        const contentJSON = await fs.promises.readFile(filename, { encoding: 'utf8' })
+        const { layers, lastId, mpvPath } = JSON.parse(contentJSON)
+        this.layers = layers
+        this.lastId = lastId
+        this.mpvPath = mpvPath
+      } catch (err) {
+        this.$electron.remote.dialog.showMessageBoxSync({
+          type: 'error',
+          message: 'Failed to import config',
+          detail: err.toString(),
+        })
+      }
+    },
+    async exportSettings () {
+      const content = {
+        layers: this.layers,
+        lastId: this.lastId,
+        mpvPath: this.mpvPath,
+      }
+
+      const filename = this.$electron.remote.dialog.showSaveDialogSync({
+        filters: this.filters.config,
+      })
+      if (filename === undefined) return
+
+      try {
+        await fs.promises.writeFile(filename, JSON.stringify(content, null, '\t'))
+      } catch (err) {
+        this.$electron.remote.dialog.showMessageBoxSync({
+          type: 'error',
+          message: 'Failed to export config',
+          detail: err.toString(),
+        })
       }
     },
   },

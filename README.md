@@ -4,9 +4,8 @@ A GUI app (only for windows for now) to easily build a compex style that involve
 
 ## TODO
 
-- add an input for the path to mpv
-- add a save/load feature for layer configuration
 - add a CLI interface so that you can automate
+- add UI to change the preview style
 
 ## Development Scripts
 
