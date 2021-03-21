@@ -224,10 +224,11 @@ export default {
       const filename = result[0]
       try {
         const contentJSON = await fs.promises.readFile(filename, { encoding: 'utf8' })
-        const { layers, lastId, mpvPath } = JSON.parse(contentJSON)
+        const { layers, lastId, mpvPath, previewStyle } = JSON.parse(contentJSON)
         this.layers = layers
         this.lastId = lastId
         this.mpvPath = mpvPath
+        this.previewStyle = previewStyle
       } catch (err) {
         this.$electron.remote.dialog.showMessageBoxSync({
           type: 'error',
@@ -241,6 +242,7 @@ export default {
         layers: this.layers,
         lastId: this.lastId,
         mpvPath: this.mpvPath,
+        previewStyle: this.previewStyle,
       }
 
       const filename = this.$electron.remote.dialog.showSaveDialogSync({
