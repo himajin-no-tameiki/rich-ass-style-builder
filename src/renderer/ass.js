@@ -5,7 +5,9 @@ const { spawn } = require('child_process')
 const { promisify } = require('util')
 const events = require('events')
 
-const dummyASSHeader = `[Script Info]
+const dummyASSHeader = (style) => {
+  const { fontName, fontSize, fontColor, shadowColor } = style
+  return `[Script Info]
 Title: Default Aegisub file
 ScriptType: v4.00+
 WrapStyle: 0
@@ -16,18 +18,19 @@ PlayResY: 1080
 
 [V4+ Styles]
 Format: Name, Fontname, Fontsize, PrimaryColour, SecondaryColour, OutlineColour, BackColour, Bold, Italic, Underline, StrikeOut, ScaleX, ScaleY, Spacing, Angle, BorderStyle, Outline, Shadow, Alignment, MarginL, MarginR, MarginV, Encoding
-Style: Default,Arial,150,&H00FEE951,&H000E0EBF,&H00FFFFFF,&H00FF0000,1,0,0,0,100,100,0,0,1,0,0,2,10,10,100,1
+Style: Default,${fontName},${fontSize},${hexColorToASSColor(fontColor)},&H000E0EBF,&H00FFFFFF,${hexColorToASSColor(shadowColor)},1,0,0,0,100,100,0,0,1,0,0,2,10,10,100,1
 
 [Events]
 Format: Layer, Start, End, Style, Name, MarginL, MarginR, MarginV, Effect, Text
 `
+}
 
 const dialoguePattern = /^Dialogue: [^,]+(,[^,]+,[^,]+,([^,]*),[^,]*,\d+,\d+,\d+,[^,]*,)(.*)$/
 
 const tempASSPath = path.resolve(__static, 'temp.ass')
 const pipePath = '\\\\.\\pipe\\mpv_rasb'
 
-export const generateDummyASS = (layers, text = 'Example text!!') => {
+export const generateDummyASS = (layers, previewStyle, text = 'Example text!!') => {
   const lines = layers.map((layer, i) => {
     const index = layers.length - i - 1
     const tags = generateTags(layer)
@@ -35,7 +38,7 @@ export const generateDummyASS = (layers, text = 'Example text!!') => {
     return `Dialogue: ${index},0:00:00.00,0:00:01.00,Default,,0,0,0,,${tags}${text}\n`
   }).join('')
 
-  return dummyASSHeader + lines
+  return dummyASSHeader(previewStyle) + lines
 }
 
 const generateTags = (layer) => {
@@ -46,20 +49,24 @@ const generateTags = (layer) => {
   }
 
   const opacityHex = (255 - opacity).toString(16).toUpperCase().padStart(2, '0')
-  const colorTag = color === null ? '' : `\\4c&H${color.slice(5, 7)}${color.slice(3, 5)}${color.slice(1, 3)}&`
+  const colorTag = color === null ? '' : `\\4c${hexColorToASSColor(color)}`
   // shadow won't be rendered if xshad = yshad = 0
   const offsetDelta = (offsetX === 0 && offsetY === 0) ? 0.0001 : 0
 
   return `{\\blur${blur}\\bord${thickness}\\3a&HFF&\\4a&H${opacityHex}&${colorTag}\\xshad${offsetX + offsetDelta}\\yshad${offsetY}}`
 }
 
-const writeDummyASS = (layers, path) => {
-  return promisify(fs.writeFile)(path, generateDummyASS(layers))
+const hexColorToASSColor = (color) => {
+  return `&H${color.slice(5, 7)}${color.slice(3, 5)}${color.slice(1, 3)}&`
 }
 
-export const openPreviewInMPV = async (layers, mpvPath) => {
+const writeDummyASS = (layers, previewStyle, path) => {
+  return promisify(fs.writeFile)(path, generateDummyASS(layers, previewStyle))
+}
+
+export const openPreviewInMPV = async (layers, previewStyle, mpvPath) => {
   const imgPath = path.resolve(__static, 'placeholder_bg.png')
-  await writeDummyASS(layers, tempASSPath)
+  await writeDummyASS(layers, previewStyle, tempASSPath)
   const mpvProc = spawn(mpvPath, [
     imgPath,
     `--input-ipc-server=${pipePath}`,
@@ -72,8 +79,8 @@ export const openPreviewInMPV = async (layers, mpvPath) => {
   return mpvProc
 }
 
-export const previewStyleOnMpv = async (layers) => {
-  await writeDummyASS(layers, tempASSPath)
+export const previewStyleOnMpv = async (layers, previewStyle) => {
+  await writeDummyASS(layers, previewStyle, tempASSPath)
   let pipe
   while (true) {
     try {

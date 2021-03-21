@@ -17,6 +17,9 @@
       <button @click="showPreview" class="button is-small">Show Preview on MPV player</button>
     </div>
     <layer-table v-model="layers" />
+    <p class="title is-6 is-spaced">Preview Style (this won't affect the final result)</p>
+    <preview-style-form v-model="previewStyle" />
+    <p class="title is-6 is-spaced">Apply</p>
     <div class="field">
       <label class="label is-small">Input File</label>
       <file-path-form v-model="srcFile" :isOpenDialog="true" :filters="filters.ass" label="Source File" />
@@ -67,6 +70,7 @@
 <script>
 import LayerTable from './LayerTable.vue'
 import FilePathForm from './FilePathForm.vue'
+import PreviewStyleForm from './PreviewStyleForm.vue'
 import { openPreviewInMPV, previewStyleOnMpv, transformAssFile } from '../ass'
 import { debounce, randomColor, createReadStreamSafe, createWriteStreamSafe } from '../utils'
 import fs from 'fs'
@@ -75,6 +79,7 @@ export default {
   components: {
     LayerTable,
     FilePathForm,
+    PreviewStyleForm,
   },
   data () {
     return {
@@ -102,6 +107,12 @@ export default {
         opacity: 255,
         offsetX: 0,
         offsetY: 0,
+      },
+      previewStyle: {
+        fontName: 'Arial',
+        fontSize: 100,
+        fontColor: '#6666FF',
+        shadowColor: '#6666FF',
       },
       filters: {
         mpv: [
@@ -152,7 +163,7 @@ export default {
       }
 
       try {
-        this.mpv = await openPreviewInMPV(this.layers, this.mpvPath)
+        this.mpv = await openPreviewInMPV(this.layers, this.previewStyle, this.mpvPath)
         this.mpv.on('error', (err) => this.$electron.remote.dialog.showMessageBoxSync({
           type: 'error',
           message: 'Cannot launch MPV',
@@ -166,8 +177,14 @@ export default {
         })
       }
     },
+    updatePreviewIfOpen: debounce(500, function () {
+      if (this.mpvIsOpened) {
+        console.log('updating layers')
+        this.updatePreview()
+      }
+    }),
     async updatePreview () {
-      await previewStyleOnMpv(this.layers)
+      await previewStyleOnMpv(this.layers, this.previewStyle)
     },
     async applyLayers () {
       this.processing = true
@@ -245,12 +262,15 @@ export default {
   watch: {
     layers: {
       deep: true,
-      handler: debounce(500, function () {
-        if (this.mpvIsOpened) {
-          console.log('updating layers')
-          this.updatePreview()
-        }
-      }),
+      handler() {
+        this.updatePreviewIfOpen()
+      },
+    },
+    previewStyle: {
+      deep: true,
+      handler() {
+        this.updatePreviewIfOpen()
+      },
     },
   },
 }

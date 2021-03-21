@@ -19,6 +19,7 @@
 </template>
 
 <script>
+// note that this component mutates the value prop
 export default {
   props: ['layer', 'index'],
   data () {
@@ -51,11 +52,17 @@ export default {
     },
   },
   watch: {
-    layer_ (val) {
-      this.$emit('input', val)
+    layer_: {
+      deep: true,
+      handler (val) {
+        this.$emit('input', val)
+      }
     },
-    layer (val) {
-      this.layer_ = val
+    layer: {
+      deep: true,
+      handler (val) {
+        this.layer_ = val
+      },
     },
   },
 }
