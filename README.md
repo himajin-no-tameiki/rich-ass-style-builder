@@ -2,7 +2,7 @@
 
 A GUI app (only for windows for now) to easily build a compex style that involves multiple layers, and to automatically apply it to any ASS files.
 
-![screenshot](https://user-images.githubusercontent.com/42849550/111899606-10a33100-8a71-11eb-977e-b158bb849e03.png)
+![screenshot](https://user-images.githubusercontent.com/42849550/111911861-84adfb00-8aaa-11eb-9438-9f37a9839def.png)
 
 ## Installation
 
@@ -11,7 +11,6 @@ Get an instlaler from the [releases page](https://github.com/himajin-no-tameiki/
 ## TODO
 
 - add a CLI interface so that you can automate
-- add UI to change the preview style
 - add UI to select which styles in the given ass file to apply the layers onto
 
 ## Development Scripts
