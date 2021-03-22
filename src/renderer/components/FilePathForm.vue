@@ -5,7 +5,6 @@
         v-model="path"
         class="input is-small"
         type="text"
-        placeholder="Output file name..."
       />
     </div>
     <div class="control">
