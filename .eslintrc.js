@@ -7,6 +7,7 @@ module.exports = {
   env: {
     browser: true,
     node: true,
+    es6: true,
   },
   globals: {
     __static: true,
@@ -17,5 +18,6 @@ module.exports = {
     'comma-dangle': [2, 'always-multiline'],
     'semi': [2, 'never'],
     'no-unused-vars': 1,
+    'no-constant-condition': ["error", { "checkLoops": false }],
   },
 }
