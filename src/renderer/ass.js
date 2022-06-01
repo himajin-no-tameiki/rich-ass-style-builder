@@ -41,19 +41,28 @@ export const generateDummyASS = (layers, previewStyle, text = 'Example text!!') 
   return dummyASSHeader(previewStyle) + lines
 }
 
-const generateTags = (layer) => {
+/**
+ * 
+ * @param {*} layer : layer object
+ * @param {*} padBorder : null, or a number indicating the maximum border width of all layers
+ * @returns 
+ */
+const generateTags = (layer, padBorder = null) => {
   const {color, thickness, blur, opacity, offsetX, offsetY} = layer
 
   if (!(opacity >= 0 && opacity <= 255)) {
     throw new Error('invalid opacity: ' + opacity)
   }
 
+  // for this workaround: https://twitter.com/sigh_of_boredom/status/1522082494606061568
+  const prefix = padBorder ? `{\\bord${padBorder}}\u200d` : ''
+
   const opacityHex = (255 - opacity).toString(16).toUpperCase().padStart(2, '0')
   const colorTag = color === null ? '' : `\\4c${hexColorToASSColor(color)}`
   // shadow won't be rendered if xshad = yshad = 0
   const offsetDelta = (offsetX === 0 && offsetY === 0) ? 0.0001 : 0
 
-  return `{\\blur${blur}\\bord${thickness}\\3a&HFF&\\4a&H${opacityHex}&${colorTag}\\xshad${offsetX + offsetDelta}\\yshad${offsetY}}`
+  return `${prefix}{\\blur${blur}\\bord${thickness}\\3a&HFF&\\4a&H${opacityHex}&${colorTag}\\xshad${offsetX + offsetDelta}\\yshad${offsetY}}`
 }
 
 const hexColorToASSColor = (color) => {
@@ -105,13 +114,22 @@ export const transformAssFile = async (inStream, outStream, layers, { targetStyl
     input: inStream,
   })
 
-  const tagsForLayers = layers.map(layer => generateTags(layer))
+  const writePromise = (data) => {
+    if (outStream.write(data)) {
+      return
+    } else {
+      return events.once(outStream, 'drain')
+    }
+  }
+
+  const maxBorder = Math.max(...layers.map(layer => layer.thickness))
+  const tagsForLayers = layers.map(layer => generateTags(layer, maxBorder))
 
   for await (const line of rl) {
     console.log('line read')
     const m = line.match(dialoguePattern)
     if (!m) {
-      outStream.write(line + '\n')
+      await writePromise(line + '\n')
       continue
     }
 
@@ -120,14 +138,14 @@ export const transformAssFile = async (inStream, outStream, layers, { targetStyl
     const text = m[3]
 
     if (targetStyles && !targetStyles.includes(style)) {
-      outStream.write(line + '\n')
+      await writePromise(line + '\n')
       continue
     }
 
-    tagsForLayers.forEach((tags, i) => {
+    for (const [i, tags] of tagsForLayers.entries()) {
       const index = tagsForLayers.length - i - 1
-      outStream.write(`Dialogue: ${index}${rest}${tags}${text}\n`)
-    })
+      await writePromise(`Dialogue: ${index}${rest}${tags}${text}\n`)
+    }
   }
 }
 
